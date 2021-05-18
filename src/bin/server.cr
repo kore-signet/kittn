@@ -116,7 +116,7 @@ while client = socket.accept?
     if path.extension.empty?
       route = (path / "index.gemini").to_s
     else
-      route = url.path
+      route = url.path[1..]
     end
   end
 

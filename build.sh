@@ -1,8 +1,8 @@
 #!/bin/bash
-shards build
-./bin/pack
-mv bin/server .
-cat header.bin >>server
-cat body.bin >>server
+shards build --release
+./bin/kittn-pack
+mv bin/kittn-server .
+cat header.bin >>kittn-server
+cat body.bin >>kittn-server
 rm header.bin
 rm body.bin

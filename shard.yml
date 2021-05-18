@@ -12,9 +12,10 @@ description: |
   a gemini server that serves all your content from a single executable
 
 targets:
-  server:
+  kittn-server:
     main: src/bin/server.cr
 
-  pack:
+  kittn-pack:
     main: src/bin/pack.cr
-# license: MIT
+
+license: AGPLv3
