@@ -3,6 +3,7 @@ a gemini server that servers all your content from a single executable
 
 ## usage
 first, set up a config like the one in the example folder.
+
 then, run ./build.sh to pack the executable, which does the following
 ```bash
 shards build # builds binaries
