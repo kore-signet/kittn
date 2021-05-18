@@ -16,3 +16,18 @@ rm body.bin
 ```
 you can then run the `server` binary, anywhere you want
 (just remember to copy the cert and key!)
+
+## fully single file mode (tls cert packing)
+by default, kittn-server will look for a `kittn.yaml` file at runtime, which should contain a path to your SSL cert and key.
+
+however, you can instead pack your SSL cert and key into the server binary itself at build-time, by making your `kittn.yaml` config the following:
+```yaml
+build:
+  path: "webroot"
+  no_external_conf: true
+  certs:
+    pack: true
+    key: "key.der"
+    cert: "cert.der"
+```
+note that the key and cert _must_ be in .der format.

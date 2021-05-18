@@ -1,19 +1,40 @@
+require "msgpack"
 require "yaml"
 
-class KittnConfig
+struct KittnConfig
   include YAML::Serializable
   property build : BuildConfig
-  property server : ServerConfig
+  property server : ServerConfig?
 end
 
-class BuildConfig
+struct BuildConfig
   include YAML::Serializable
   property path : String
+  property no_external_conf : Bool = false
+  property certs : CertConfig?
 end
 
-class ServerConfig
+struct CertConfig
+  include YAML::Serializable
+  property pack : Bool = true
+  property key : String
+  property cert : String
+end
+
+struct ServerConfig
   include YAML::Serializable
   property port : Int32 = 1965
   property key : String
   property cert : String
+end
+
+struct PackedConfig
+  include MessagePack::Serializable
+  property key : String? = nil
+  property cert : String? = nil
+  property no_external_conf : Bool = false
+
+  def initialize()
+
+  end
 end

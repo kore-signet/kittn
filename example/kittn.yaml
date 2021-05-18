@@ -1,6 +1,7 @@
 build:
   path: "webroot"
-
-server:
-  key: "key.pem"
-  cert: "cert.pem"
+  no_external_conf: true
+  certs:
+    pack: true
+    key: "key.der"
+    cert: "cert.der"

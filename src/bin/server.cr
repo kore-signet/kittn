@@ -1,10 +1,27 @@
+require "openssl"
 require "digest"
 require "msgpack"
 require "uri"
 require "log"
 require "../*"
 
-kittn_conf = KittnConfig.from_yaml(File.read "kittn.yaml")
+lib LibSSL
+ fun ssl_ctx_use_rsaprivatekey_asn1 = SSL_CTX_use_RSAPrivateKey_ASN1(ctx : LibSSL::SSLContext, key : LibC::Char*, len : LibC::Long) : LibC::Int
+ fun ssl_ctx_use_certificate_asn1 = SSL_CTX_use_certificate_ASN1(ctx : LibSSL::SSLContext, len : LibC::Int, cert : LibC::Char*) : LibC::Int
+end
+
+class OpenSSL::SSL::Context::Server
+  def privatekey_s=(key : String)
+    ret = LibSSL.ssl_ctx_use_rsaprivatekey_asn1(@handle,key,key.bytesize)
+    raise OpenSSL::Error.new("SSL_CTX_use_RSAPrivateKey_ASN1") unless ret == 1
+  end
+
+  def cert_s=(cert : String)
+    ret = LibSSL.ssl_ctx_use_certificate_asn1(@handle,cert.bytesize,cert)
+    raise OpenSSL::Error.new("SSL_CTX_use_certificate_ASN1") unless ret == 1
+  end
+end
+
 
 Log.setup_from_env
 
@@ -27,28 +44,29 @@ assert f.read_string(37) == "++like a backpack, but kitten sized++", "couldn't f
 Log.debug { "reading SHA512 hashes" }
 
 # read SHA512 digest of pathing tree
-stored_tree_digest = Bytes.new 64,0
-f.read stored_tree_digest
+stored_backpack_digest = Bytes.new 64,0
+f.read stored_backpack_digest
 
 # read SHA512 digest of contents
 stored_body_digest = Bytes.new 64,0
 f.read stored_body_digest
 
-Log.debug { "finding routing tree" }
+Log.debug { "finding config & routing tree" }
 
 # find end of header
 r = f.gets("--like a backpack, but kitten sized--").not_nil!.to_slice
-tree_bytes = r[0,r.size-37]
+backpack_bytes = r[0,r.size-37]
 
-Log.debug { "checking routing tree & body against hashes" }
+Log.debug { "checking config, routing tree & body against hashes" }
 
-tree_digest = Digest::SHA512.new
-tree_digest << tree_bytes
-tree_digest = tree_digest.final
+backpack_digest = Digest::SHA512.new
+backpack_digest << backpack_bytes
+backpack_digest = backpack_digest.final
 
-assert tree_digest == stored_tree_digest, "checksum for the kittn header section doesn't match - did the file get corrupted? :<"
+assert backpack_digest == stored_backpack_digest, "checksum for the kittn header section doesn't match - did the file get corrupted? :<"
 
-router = Trie(Document).from_msgpack tree_bytes
+backpack = Header.from_msgpack backpack_bytes
+router = backpack.router
 
 body_start = f.pos
 
@@ -60,11 +78,25 @@ assert body_digest == stored_body_digest, "checksum for the kittn body section d
 
 Log.info { "starting kittn gemini server v0.0.1" }
 
-socket = TCPServer.new(kittn_conf.server.port)
+if backpack.config.no_external_conf
+  assert !backpack.config.cert.nil? && !backpack.config.key.nil?, "kittn was configured to not use any external files, but no certificates for SSL were packed ><"
 
-context = OpenSSL::SSL::Context::Server.new
-context.private_key = kittn_conf.server.key
-context.certificate_chain = kittn_conf.server.cert
+  socket = TCPServer.new(1965)
+
+  context = OpenSSL::SSL::Context::Server.new
+  context.cert_s = backpack.config.cert.not_nil!
+  context.privatekey_s = backpack.config.key.not_nil!
+else
+  kittn_conf = KittnConfig.from_yaml(File.read "kittn.yaml")
+  server_conf = kittn_conf.server.not_nil!
+
+  socket = TCPServer.new(server_conf.port)
+
+  context = OpenSSL::SSL::Context::Server.new
+  context.private_key = server_conf.key
+  context.certificate_chain = server_conf.cert
+end
+
 
 while client = socket.accept?
   Log.debug { "got client!" }
