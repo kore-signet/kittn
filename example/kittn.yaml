@@ -1,0 +1,6 @@
+build:
+  path: "webroot"
+
+server:
+  key: "key.pem"
+  cert: "cert.pem"

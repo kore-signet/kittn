@@ -1,0 +1,20 @@
+name: kittn
+version: 0.1.0
+
+dependencies:
+  msgpack:
+    github: crystal-community/msgpack-crystal
+
+authors:
+  - allie signet <allie@cat-girl.gay>
+
+description: |
+  a gemini server that serves all your content from a single executable
+
+targets:
+  server:
+    main: src/bin/server.cr
+
+  pack:
+    main: src/bin/pack.cr
+# license: MIT
