@@ -16,3 +16,5 @@ header.bin
 key.pem
 cert.pem
 /dev/
+kittn-server
+kittn-pack

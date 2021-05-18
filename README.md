@@ -2,6 +2,15 @@
 a gemini server that servers all your content from a single executable
 
 ## usage
+for everyday usage, you usually won't want to re-build the kittn binaries - you might not even have crystal installed, for example.
+
+to use without compiling, first install the `kittn-server` and `kittn-pack` binaries to your path, and set up a config like the one in the example folder.
+
+then, run `./pack.sh`, which make a copy of the kittn-server in your current directory, and add your content to it.
+
+you can now run `./kittn-server` and acess your server at `gemini://localhost`!
+
+## usage - building
 first, set up a config like the one in the example folder.
 
 then, run ./build.sh to pack the executable, which does the following
